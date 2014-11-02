@@ -1,6 +1,8 @@
 ﻿
 // imports
 using System;
+using System.Collections.Generic;
+using System.IO;
 
 // package
 namespace fold_cs
@@ -43,7 +45,8 @@ namespace fold_cs
             uint width = DEFAULT_WIDTH;
             bool measureInBytes = false;
             bool retainWordStructure = false;
-
+            List<String> fileNames = new List<string>();
+            
             // read command line arguments
             bool nextArgumentSpecifiesWidth = false;
             bool readingFiles = false;
@@ -81,9 +84,27 @@ namespace fold_cs
                     nextArgumentSpecifiesWidth = false;
                     width = getWidthFromInput(argument);
                 }
+                else // specifying a target filename.
+                {
+                    fileNames.Add(argument);
+                }
             }
 
-            Console.WriteLine("The width is: "+width);
+            int numFiles = fileNames.Count;
+
+            Console.WriteLine("The specified width is: " + width);
+            Console.WriteLine("The number of files specified is: " + numFiles);
+            Console.WriteLine("The files are:");
+            Console.Write("     ");
+
+            for ( int i = 0 ; i < numFiles ; i++ )
+            {
+                Console.Write(fileNames[i]);
+                if (i + 1 != numFiles)
+                    Console.Write(", ");
+                else
+                    Console.WriteLine(".");
+            }
 
             // pause program for debugging.
             string read = Console.ReadLine();
