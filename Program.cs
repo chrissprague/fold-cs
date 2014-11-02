@@ -7,36 +7,83 @@ using System.IO;
 // package
 namespace fold_cs
 {
+    /**
+     *  Implementation class of BSD's fold in C#.
+     *  Program is run through the command line with arguments
+     *  to specify behavior, designed to emulate, as closely as
+     *  possible, that of fold.
+     *  
+     * Author: Christopher Sprague
+     * Date: November 2014
+     * See: https://github.com/chrissprague/fold-cs
+     */
     class fold
     {
-
         public const uint DEFAULT_WIDTH = 80;
 
-        private static uint getWidthFromInput(string input)
+        /**
+         * Attempt to parse the given input string into the width parameter.
+         * 
+         * Params:
+         *  String input    - input string, ready to be parsed to get the width
+         *  
+         * Returns
+         *  uint width      - the width, parsed from the input, if op was successful.
+         * 
+         */
+        private static uint getWidthFromInput(String input)
         {
             uint width = 80;
-            if ( "".Equals(input) ) // also handles null
+            if ( "".Equals(input) || input == null )
             {
-                // TODO: Error message
-                return 0;
+                Console.Error.WriteLine("ERROR: Missing or bad input for width argument.");
+                Environment.Exit(2);
             }
 
             try
             {
-                // TODO: catch uint overflow ( >~ 4x10E9 )
-                width = uint.Parse(input);
+                if ( input.Trim().Length > 7 )
+                {
+                    Console.Error.WriteLine("ERROR: Specified width value ({0}) too large, " +
+                        "reverting to max value 999,999.", input);
+                    width = 999999;
+                }
+                else
+                {
+                    width = uint.Parse(input);
+                }
+                
             }
             catch (FormatException ex)
             {
                 Console.Error.WriteLine("ERROR: Invalid width value.");
                 Console.Error.WriteLine(ex.StackTrace);
-                // TODO: exit with non-zero error code here
+                Environment.Exit(1);
             }
             return width;
         }
 
+        /**
+         * doFold reads through the given StreamReader to echo the text
+         * read from it. If the length of a given line read from the StreamReader
+         * is longer than the width (specified either by default or by the program's
+         * arguments), doFold will terminate ths current line and write the rest
+         * of the line that was read in from the StreamReader on the next line
+         * (this process will continue to wrap onto new lines until the line read
+         * is exhausted.)
+         * 
+         * Params:
+         *  StreamReader sr             - StreamReader for a file specified in program arguments
+         *  uint width                  - length of a line in order to do a fold.
+         *  bool measureInBytes         - if true, length is measured in bytes rather than chars
+         *  bool retainWordStructure    - if true, words are kept together on new lines
+         * 
+         * Returns:
+         *  None
+         * 
+         */
         private static void doFold(StreamReader sr, uint width,
-            bool measureInBytes, bool retainWordStructure)
+            bool measureInBytes = false, bool retainWordStructure = false)
         {
             if ( sr == null )
             {
@@ -70,7 +117,19 @@ namespace fold_cs
             }
         }
 
-        static void Main(string[] args)
+        /**
+         * Main program function. Reads in command-line arguments in order to
+         * determine what will be performed at runtime.
+         * 
+         * Params:
+         *  string[] args   - command-line arguments provided to the program
+         *  
+         * Returns:
+         *  0 for exit success,
+         *      otherwise the program will exit prematurely with a non-zero 
+         *      exit code to signify failure
+         */
+        static int Main(string[] args)
         {
             /* TODO: Implement these flags
              *  -b      measure width in bytes instead of columns/characters
@@ -141,38 +200,31 @@ namespace fold_cs
                 else
                     Console.WriteLine(".");
             }
+            // write another new line so output looks nicer.
+            Console.WriteLine();
 
-            Console.WriteLine(Directory.GetCurrentDirectory());
-
-            List<StreamReader> streamReaders = new List<StreamReader>();
-
-            // open StreamReaders
-            foreach ( String fileName in fileNames )
+            // do stuff with files here
+            foreach (String fileName in fileNames)
             {
+                StreamReader sr = null;
                 try
                 {
-                    streamReaders.Add(new StreamReader(@fileName));
-                } catch ( System.IO.FileNotFoundException )
+                    sr = new StreamReader(fileName);
+                    Console.WriteLine("===== " + fileName + " =====");
+                    doFold(sr, width, measureInBytes, retainWordStructure);
+                    Console.WriteLine();
+                }
+                catch (System.IO.FileNotFoundException)
                 {
                     Console.Error.WriteLine("ERROR: File not found: \"{0}\".", fileName);
                 }
             }
 
-            // do stuff with files here
-            foreach (StreamReader fs in streamReaders)
-            {
-                doFold(fs, width, measureInBytes, retainWordStructure);
-            }
-
-            // close StreamReaders so resource leaks do not occur
-            foreach (StreamReader fs in streamReaders)
-            {
-                // TODO close StreamReaders as they are completed, not all at once at the end
-                fs.Close();
-            }
-
             // pause program for debugging.
             string read = Console.ReadLine();
+
+            // exit success
+            return 0;
         }
     }
 }
