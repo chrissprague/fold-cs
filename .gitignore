@@ -1,0 +1,10 @@
+*.config
+*.exe
+*.pdb
+*.manifest
+*.csproj
+*.user
+*.cache
+obj/Debug/*
+Properties
+bin/Debug

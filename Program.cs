@@ -35,6 +35,41 @@ namespace fold_cs
             return width;
         }
 
+        private static void doFold(StreamReader sr, uint width,
+            bool measureInBytes, bool retainWordStructure)
+        {
+            if ( sr == null )
+            {
+                Console.Error.WriteLine("WARNING: received a null StreamReader, skipping...");
+                return;
+            }
+
+            String line = null;
+
+            // read file line-by-line
+            while((line = sr.ReadLine()) != null )
+            {
+                if ( line.Length < width )
+                {
+                    // the length of the line is less than the width, we can just echo here.
+                    Console.WriteLine(line);
+                }
+                else
+                {
+                    // the length of the line exceeded the width, so we need to fold here.
+                    int currentIndex = 0;
+                    while (currentIndex < line.Length)
+                    {
+                        for (int i = 0; i < width && currentIndex < line.Length; i++)
+                        {
+                            Console.Write(line[currentIndex++]);
+                        }
+                        Console.WriteLine();
+                    }
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
             /* TODO: Implement these flags
@@ -53,7 +88,7 @@ namespace fold_cs
             foreach ( string argument in args )
             {
                 // User is specifying a flag argument to the program.
-                if ( ( argument[0] == '-' ) && ( argument.Length >= 2 ) )
+                if ( ( argument[0] == '-' ) && ( argument.Length >= 2 ) && ( ! readingFiles ) )
                 {
                     for ( byte i = 1 ; i < argument.Length ; ++i )
                     {
@@ -86,6 +121,7 @@ namespace fold_cs
                 }
                 else // specifying a target filename.
                 {
+                    readingFiles = true;
                     fileNames.Add(argument);
                 }
             }
@@ -104,6 +140,35 @@ namespace fold_cs
                     Console.Write(", ");
                 else
                     Console.WriteLine(".");
+            }
+
+            Console.WriteLine(Directory.GetCurrentDirectory());
+
+            List<StreamReader> streamReaders = new List<StreamReader>();
+
+            // open StreamReaders
+            foreach ( String fileName in fileNames )
+            {
+                try
+                {
+                    streamReaders.Add(new StreamReader(@fileName));
+                } catch ( System.IO.FileNotFoundException )
+                {
+                    Console.Error.WriteLine("ERROR: File not found: \"{0}\".", fileName);
+                }
+            }
+
+            // do stuff with files here
+            foreach (StreamReader fs in streamReaders)
+            {
+                doFold(fs, width, measureInBytes, retainWordStructure);
+            }
+
+            // close StreamReaders so resource leaks do not occur
+            foreach (StreamReader fs in streamReaders)
+            {
+                // TODO close StreamReaders as they are completed, not all at once at the end
+                fs.Close();
             }
 
             // pause program for debugging.
