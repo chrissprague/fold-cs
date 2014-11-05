@@ -96,22 +96,86 @@ namespace fold_cs
             // read file line-by-line
             while((line = sr.ReadLine()) != null )
             {
-                if ( line.Length < width )
+                if ( measureInBytes )
                 {
-                    // the length of the line is less than the width, we can just echo here.
-                    Console.WriteLine(line);
-                }
-                else
-                {
-                    // the length of the line exceeded the width, so we need to fold here.
-                    int currentIndex = 0;
-                    while (currentIndex < line.Length)
+                    // mib
+                    if (retainWordStructure)
                     {
-                        for (int i = 0; i < width && currentIndex < line.Length; i++)
+                        // rws
+
+                        if (line.Length < width)
                         {
-                            Console.Write(line[currentIndex++]);
+                            // the length of the line is less than the width, we can just echo here.
+                            Console.WriteLine(line);
                         }
-                        Console.WriteLine();
+                        else
+                        {
+                            int currIndex = 0;
+                            String toWrite = null;
+                            for (int i = 0; i < width && currIndex < line.Length; i++)
+                            {
+                                toWrite += line[currIndex++];
+                                Console.Write(line[currIndex++]);
+                            }
+                            Console.WriteLine();
+                        }
+
+                    }
+                    else
+                    {
+                        // standard
+
+                        // the length of the line exceeded the width, so we need to fold here.
+                        int currentIndex = 0;
+                        while (currentIndex < line.Length)
+                        {
+                            for (int i = 0; i < width && currentIndex < line.Length; i++)
+                            {
+                                Console.Write(line[currentIndex++]);
+                            }
+                            Console.WriteLine();
+                        }
+                    }
+                } else
+                {
+                    // standard
+
+                    if (retainWordStructure)
+                    {
+                        // rws
+
+                        if (line.Length < width)
+                        {
+                            // the length of the line is less than the width, we can just echo here.
+                            Console.WriteLine(line);
+                        }
+                        else
+                        {
+                            int currIndex = 0;
+                            String toWrite = null;
+                            for (int i = 0; i < width && currIndex < line.Length; i++)
+                            {
+                                toWrite += line[currIndex++];
+                                Console.Write(line[currIndex++]);
+                            }
+                            Console.WriteLine();
+                        }
+
+                    }
+                    else
+                    {
+                        // standard
+
+                        // the length of the line exceeded the width, so we need to fold here.
+                        int currentIndex = 0;
+                        while (currentIndex < line.Length)
+                        {
+                            for (int i = 0; i < width && currentIndex < line.Length; i++)
+                            {
+                                Console.Write(line[currentIndex++]);
+                            }
+                            Console.WriteLine();
+                        }
                     }
                 }
             }
