@@ -85,6 +85,7 @@ namespace fold_cs
         private static void doFold(StreamReader sr, uint width,
             bool measureInBytes = false, bool retainWordStructure = false)
         {
+
             if ( sr == null )
             {
                 Console.Error.WriteLine("WARNING: received a null StreamReader, skipping...");
@@ -110,12 +111,22 @@ namespace fold_cs
                         }
                         else
                         {
+
                             int currIndex = 0;
-                            String toWrite = null;
+                            String buffer = null;
                             for (int i = 0; i < width && currIndex < line.Length; i++)
                             {
-                                toWrite += line[currIndex++];
-                                Console.Write(line[currIndex++]);
+                                if (line[currIndex].Equals(' ') || line[currIndex].Equals('-') )
+                                {
+                                    Console.Write(buffer);
+                                }
+                                buffer += line[currIndex++];
+                            }
+                            Console.WriteLine();
+                            while (buffer.Length > 0)
+                            {
+                                Console.Write(buffer[0]);
+                                buffer = buffer.Remove(0);
                             }
                             Console.WriteLine();
                         }
@@ -151,14 +162,60 @@ namespace fold_cs
                         }
                         else
                         {
+
                             int currIndex = 0;
-                            String toWrite = null;
-                            for (int i = 0; i < width && currIndex < line.Length; i++)
+                            int currLinePos = 0;
+                            String buffer = line;
+
+                            // for every character on this line...
+                            while (currIndex < line.Length)
                             {
-                                toWrite += line[currIndex++];
-                                Console.Write(line[currIndex++]);
+                                if ( ( buffer.Length > 0 ) && 
+                                    ( currLinePos + buffer.Length <= width ) &&
+                                    ( line[currIndex].Equals(' ') || line[currIndex].Equals('-') ) )
+                                {
+                                    Console.Write(buffer);
+                                    currLinePos += buffer.Length;
+                                    buffer = "";
+                                } else if ( buffer.Length > width )
+                                {
+                                    if ( currLinePos != 0 )
+                                    {
+                                        Console.WriteLine();
+
+                                    }
+                                    else
+                                    {
+                                        int index = 0;
+                                        bool hyphenate = true;
+                                        while ( index < buffer.Length )
+                                        {
+                                            for (int i = 0; i < width - 1; i++)
+                                            {
+                                                if ( index < buffer.Length )
+                                                {
+                                                    Console.Write(buffer[index++]);
+                                                    currLinePos++;
+                                                    currIndex++;
+                                                }
+                                                else
+                                                {
+                                                    hyphenate = false;
+                                                    break;
+                                                }
+                                            }
+                                            if (hyphenate)
+                                            {
+                                                Console.WriteLine("-");
+                                                currLinePos = 0;
+                                            }
+
+                                        }
+                                        buffer = "";
+                                    }
+                                }
                             }
-                            Console.WriteLine();
+
                         }
 
                     }
@@ -224,15 +281,21 @@ namespace fold_cs
                             nextArgumentSpecifiesWidth = false;
                             break;
                         }
-                        if ( ! ( flag == 'w' ) || ( flag == 's' ) || ( flag == 'b' ) )
+                        if ( ! ( flag == 'w' ) && ! ( flag == 's' ) && ! ( flag == 'b' ) )
                         {
                             Console.Error.WriteLine("ERROR: Invalid flag '{0}'.", flag);
                         } else
                         {
                             if (flag == 'b')
+                            {
+                                Console.WriteLine("Measuring in bytes instead of characters.");
                                 measureInBytes = true;
+                            }
                             if (flag == 's')
+                            {
+                                Console.WriteLine("Word structure will be retained on lines.");
                                 retainWordStructure = true;
+                            }
                             if (flag == 'w')
                                 nextArgumentSpecifiesWidth = true;
                         }
