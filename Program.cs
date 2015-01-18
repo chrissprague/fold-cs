@@ -155,9 +155,10 @@ namespace fold_cs
                     {
                         // rws
 
-                        if (line.Length < width)
+                        if (line.Length <= width)
                         {
-                            // the length of the line is less than the width, we can just echo here.
+                            // the length of the line is less than or equal to 
+                            // the width, we can just echo here.
                             Console.WriteLine(line);
                         }
                         else
@@ -190,7 +191,7 @@ namespace fold_cs
                                         bool hyphenate = true;
                                         while ( index < buffer.Length )
                                         {
-                                            for (int i = 0; i < width - 1; i++)
+                                            for (int i = 0; i < width; i++)
                                             {
                                                 if ( index < buffer.Length )
                                                 {
@@ -206,7 +207,7 @@ namespace fold_cs
                                             }
                                             if (hyphenate)
                                             {
-                                                Console.WriteLine("-");
+                                                Console.WriteLine();
                                                 currLinePos = 0;
                                             }
 
@@ -215,7 +216,7 @@ namespace fold_cs
                                     }
                                 }
                             }
-
+                            Console.WriteLine();
                         }
 
                     }
